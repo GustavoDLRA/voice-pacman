@@ -1,0 +1,9 @@
+[02:48:36] Hola.
+[02:48:40] qué tal
+[02:48:44] Como estas?
+[02:48:48] Esta es una prueba.
+[02:48:52] para el motor de
+[02:48:56] Procesamiento de texto en español.
+[02:49:00] Muy bien.
+[02:49:04] Voy a.
+[02:49:08] apagar el proceso
