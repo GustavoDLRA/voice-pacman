@@ -7,7 +7,7 @@ from pellets import PelletGroup
 from ghosts import GhostGroup
 from fruit import Fruit
 from pauser import Pause
-from text import TextGroup
+from text import Text, TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
@@ -34,6 +34,11 @@ class GameController(object):
         self.mazesprites = MazeSprites("maze1.txt", "maze1_rotation.txt")
         self.fruitCaptured = []
         self.mazedata = MazeData()
+        # Language options for the game
+        self.language_options = ["ENGLISH", "ESPAÑOL"]
+        self.language_codes = ["en", "es"]
+        self.selected_language_index = 0
+        self.language = self.language_codes[self.selected_language_index]
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -66,39 +71,41 @@ class GameController(object):
         self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
+        self.title_screen = False
             
             
 
 
     def update(self):
         dt = self.clock.tick(30) / 1000.0
-        self.textgroup.update(dt)
-        self.pellets.update(dt)
-        if not self.pause.paused:
-            self.ghosts.update(dt)
-            if self.fruit is not None:
-                self.fruit.update(dt)
-            self.checkPelletEvents()
-            self.checkGhostEvents()
-            self.checkFruitEvents()
-        if self.pacman.alive:
+        if not self.title_screen:
+            self.textgroup.update(dt)
+            self.pellets.update(dt)
             if not self.pause.paused:
+                self.ghosts.update(dt)
+                if self.fruit is not None:
+                    self.fruit.update(dt)
+                self.checkPelletEvents()
+                self.checkGhostEvents()
+                self.checkFruitEvents()
+            if self.pacman.alive:
+                if not self.pause.paused:
+                    self.pacman.update(dt)
+            else:
                 self.pacman.update(dt)
-        else:
-            self.pacman.update(dt)
 
-        if self.flashBG:
-            self.flashTimer += dt
-            if self.flashTimer >= self.flashTime:
-                self.flashTimer = 0
-                if self.background == self.background_norm:
-                    self.background = self.background_flash
-                else:
-                    self.background = self.background_norm
+            if self.flashBG:
+                self.flashTimer += dt
+                if self.flashTimer >= self.flashTime:
+                    self.flashTimer = 0
+                    if self.background == self.background_norm:
+                        self.background = self.background_flash
+                    else:
+                        self.background = self.background_norm
 
-        afterPauseMethod = self.pause.update(dt)
-        if afterPauseMethod is not None:
-            afterPauseMethod()
+            afterPauseMethod = self.pause.update(dt)
+            if afterPauseMethod is not None:
+                afterPauseMethod()
         self.checkEvents()
         self.render()
 
@@ -144,15 +151,26 @@ class GameController(object):
             if event.type == QUIT:
                 exit()
             elif event.type == KEYDOWN:
-                if event.key == K_SPACE:
-                    if self.pacman.alive:
-                        self.pause.setPause(playerPaused=True)
-                        if not self.pause.paused:
-                            self.textgroup.hideText()
-                            self.showEntities()
-                        else:
-                            self.textgroup.showText(PAUSETXT)
-                            self.hideEntities()
+                if not self.title_screen:
+                    if event.key == K_SPACE:
+                        if self.pacman.alive:
+                            self.pause.setPause(playerPaused=True)
+                            if not self.pause.paused:
+                                self.textgroup.hideText()
+                                self.showEntities()
+                            else:
+                                self.textgroup.showText(PAUSETXT)
+                                self.hideEntities()
+                else:
+                    if event.key == K_UP:
+                        self.selected_language_index = (self.selected_language_index - 1) % len(self.language_options)
+                        self.updateLanguageSelection()
+                    elif event.key == K_DOWN:
+                        self.selected_language_index = (self.selected_language_index + 1) % len(self.language_options)
+                        self.updateLanguageSelection()
+                    elif event.key == K_RETURN:
+                        self.language = self.language_codes[self.selected_language_index]
+                        self.startGame()
 
 
     def checkPelletEvents(self):
@@ -185,31 +203,36 @@ class GameController(object):
                     if fruit.get_offset() == self.fruit.image.get_offset():
                         fruitCaptured = True
                         break
-                    if not fruitCaptured:
-                        self.fruitCaptured.append(self.fruit.image)
+                if not fruitCaptured:
+                    self.fruitCaptured.append(self.fruit.image)
                 self.fruit = None
             elif self.fruit.destroy:
                 self.fruit = None
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
-        #self.nodes.render(self.screen) ## LINE TO DRAW THE NODES
-        self.pellets.render(self.screen)
-        if self.fruit is not None:
-            self.fruit.render(self.screen)
-        self.pacman.render(self.screen)
-        self.ghosts.render(self.screen)
-        self.textgroup.render(self.screen)
+        if not self.title_screen:
+            #self.nodes.render(self.screen) ## LINE TO DRAW THE NODES
+            self.pellets.render(self.screen)
+            if self.fruit is not None:
+                self.fruit.render(self.screen)
+            self.pacman.render(self.screen)
+            self.ghosts.render(self.screen)
+            self.textgroup.render(self.screen)
 
-        for i in range(len(self.lifesprites.images)):
-            x = self.lifesprites.images[i].get_width() * i
-            y = SCREENHEIGHT - self.lifesprites.images[i].get_height()
-            self.screen.blit(self.lifesprites.images[i], (x, y))
+            for i in range(len(self.lifesprites.images)):
+                x = self.lifesprites.images[i].get_width() * i
+                y = SCREENHEIGHT - self.lifesprites.images[i].get_height()
+                self.screen.blit(self.lifesprites.images[i], (x, y))
 
-        for i in range(len(self.fruitCaptured)):
-            x = SCREENWIDTH - self.fruitCaptured[i].get_width() * (i+1)
-            y = SCREENHEIGHT - self.fruitCaptured[i].get_height()
-            self.screen.blit(self.fruitCaptured[i], (x, y))
+            for i in range(len(self.fruitCaptured)):
+                x = SCREENWIDTH - self.fruitCaptured[i].get_width() * (i+1)
+                y = SCREENHEIGHT - self.fruitCaptured[i].get_height()
+                self.screen.blit(self.fruitCaptured[i], (x, y))
+        else:
+            self.titleText.render(self.screen) 
+            for text in self.languageTexts:
+                text.render(self.screen)
 
         pygame.display.update()
 
@@ -232,6 +255,7 @@ class GameController(object):
         self.textgroup.showText(READYTXT)
         self.lifesprites.resetLives(self.lives)
         self.fruitCaptured = []
+        self.loadTitleScreen()
 
 
     def resetLevel(self):
@@ -241,10 +265,32 @@ class GameController(object):
         self.fruit = None
         self.textgroup.showText(READYTXT)
 
+    def loadTitleScreen(self):
+        self.title_screen = True
+        self.setTitleScreenBackground()
+        self.titleText = Text("PACMAN", YELLOW, 32, 10, 64)
+        self.languageTexts = [
+            Text(self.language_options[0], WHITE, 100, 220, 16),
+            Text(self.language_options[1], WHITE, 100, 260, 16),
+        ]
+        self.updateLanguageSelection()
+        
+
+    def setTitleScreenBackground(self):
+        self.background = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background.fill(BLACK)
+
+    def updateLanguageSelection(self):
+        for i, text in enumerate(self.languageTexts):
+            text.color = YELLOW if i == self.selected_language_index else WHITE
+            text.createLabel()
+
+
 
 
 if __name__ == "__main__":
     game = GameController()
-    game.startGame()
+    #game.startGame()
+    game.loadTitleScreen()
     while True:
         game.update()
