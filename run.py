@@ -11,6 +11,8 @@ from text import Text, TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
+from voice_control import VoiceController
+from voice_commands import parse_direction
 
 
 class GameController(object):
@@ -39,6 +41,8 @@ class GameController(object):
         self.language_codes = ["en", "es"]
         self.selected_language_index = 0
         self.language = self.language_codes[self.selected_language_index]
+        self.voice = VoiceController(device=0, language=self.language, compute_device="cuda")
+        self.voice.start()
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -88,6 +92,7 @@ class GameController(object):
                 self.checkPelletEvents()
                 self.checkGhostEvents()
                 self.checkFruitEvents()
+                self.checkVoiceEvents()
             if self.pacman.alive:
                 if not self.pause.paused:
                     self.pacman.update(dt)
@@ -149,6 +154,7 @@ class GameController(object):
     def checkEvents(self):
         for event in pygame.event.get():
             if event.type == QUIT:
+                self.voice.stop()
                 exit()
             elif event.type == KEYDOWN:
                 if not self.title_screen:
@@ -170,6 +176,7 @@ class GameController(object):
                         self.updateLanguageSelection()
                     elif event.key == K_RETURN:
                         self.language = self.language_codes[self.selected_language_index]
+                        self.voice.language = self.language
                         self.startGame()
 
 
@@ -208,6 +215,13 @@ class GameController(object):
                 self.fruit = None
             elif self.fruit.destroy:
                 self.fruit = None
+
+    def checkVoiceEvents(self):
+        text = self.voice.get_text()
+        if text:
+            direction = parse_direction(text, self.language)
+            if direction is not None:
+                self.pacman.voiceDirection = direction
 
     def render(self):
         self.screen.blit(self.background, (0, 0))

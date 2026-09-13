@@ -15,6 +15,7 @@ class Pacman(Entity):
         self.setBetweenNodes(LEFT)
         self.alive = True
         self.sprites = PacmanSprites(self)
+        self.voiceDirection = None
 
 
     def getValidKey(self):
@@ -27,6 +28,8 @@ class Pacman(Entity):
             return LEFT
         if keyp_pressed[K_RIGHT]:
             return RIGHT
+        if self.voiceDirection is not None:
+            return self.voiceDirection
         return STOP
 
     def update(self, dt):
@@ -72,6 +75,7 @@ class Pacman(Entity):
         self.direction = LEFT
         self.setBetweenNodes(LEFT)
         self.alive = True
+        self.voiceDirection = None
         self.image = self.sprites.getStartImage()
         self.sprites.reset()
 
