@@ -41,7 +41,7 @@ class GameController(object):
         self.language_codes = ["en", "es"]
         self.selected_language_index = 0
         self.language = self.language_codes[self.selected_language_index]
-        self.voice = VoiceController(device=0, language=self.language, compute_device="cuda")
+        self.voice = VoiceController(device=None, language=self.language, compute_device="cuda")
         self.voice.start()
 
     def setBackground(self):

@@ -124,21 +124,25 @@ class VoiceController:
         if self._stop_event.is_set():
             return # stop() was called while we were still loading the model
 
-        devinfo = sd.query_devices(self.device, "input")
-        self._samplerate = int(devinfo["default_samplerate"])
-        self._channels = min(devinfo["max_input_channels"], 2) or 1
-        self._frames_per_chunk = int(self._samplerate * self.chunk_duration)
+        try:
+            devinfo = sd.query_devices(self.device, "input")
+            self._samplerate = int(devinfo["default_samplerate"])
+            self._channels = min(devinfo["max_input_channels"], 2) or 1
+            self._frames_per_chunk = int(self._samplerate * self.chunk_duration)
 
-        self._stream = sd.InputStream(
-            device=self.device,
-            samplerate=self._samplerate,
-            channels=self._channels,
-            callback=self._audio_callback,
-            blocksize=int(self._samplerate * 0.2),
-            latency="high",
-        )
-        self._stream.start()
-        print(f"[voice] listening on device {self.device!r} ({self._samplerate}Hz, {self._channels}ch)")
+            self._stream = sd.InputStream(
+                device=self.device,
+                samplerate=self._samplerate,
+                channels=self._channels,
+                callback=self._audio_callback,
+                blocksize=int(self._samplerate * 0.2),
+                latency="high",
+            )
+            self._stream.start()
+            print(f"[voice] listening on device {devinfo['name']!r} ({self._samplerate}Hz, {self._channels}ch)")
+        except Exception as e:
+            self.error = f"Failed to open audio input device {self.device!r}: {e}"
+            return
 
         chunker = threading.Thread(target=self._chunker_loop, daemon=True)
         transcriber = threading.Thread(target=self._transcriber_loop, daemon=True)
