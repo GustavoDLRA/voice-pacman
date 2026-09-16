@@ -25,4 +25,4 @@ uv run python run.py
 
 You'll need an Nvidia GPU.
 
-The base Pac-Man implementation is based on the work done by Jonathan Richards in his Pacmancode[https://pacmancode.com/] website. 
+The base Pac-Man implementation is based on the work done by Jonathan Richards in his [Pacmancode](https://pacmancode.com) website. 
