@@ -9,17 +9,16 @@ If you'd like to try it out, follow these instructions:
 https://docs.astral.sh/uv/getting-started/installation/
 ```
    
-
-3. Clone the repo:
+2. Clone the repo:
    ```
    git clone <your-repo-url>
    cd VoicePacman
    ```
-5. Install dependencies and create the environment:
+3. Install dependencies and create the environment:
    ```
    uv sync
    ```
-7. Run the game:
+4. Run the game:
    ```
    uv run python run.py
    ```
