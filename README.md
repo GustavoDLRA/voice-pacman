@@ -10,17 +10,17 @@ https://docs.astral.sh/uv/getting-started/installation/
 ```
    
 2. Clone the repo:
-   ```
-   git clone <your-repo-url>
-   cd VoicePacman
-   ```
+```
+git clone <your-repo-url>
+cd VoicePacman
+```
 3. Install dependencies and create the environment:
-   ```
-   uv sync
-   ```
+```
+uv sync
+```
 4. Run the game:
-   ```
-   uv run python run.py
-   ```
+```
+uv run python run.py
+```
 
 You'll need an Nvidia GPU.
