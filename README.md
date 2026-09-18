@@ -11,7 +11,7 @@ https://docs.astral.sh/uv/getting-started/installation/
    
 2. Clone the repo:
 ```
-git clone <repo-url>
+git clone [<repo-url>](https://github.com/GustavoDLRA/voice-pacman.git)
 cd VoicePacman
 ```
 3. Install dependencies and create the environment:
