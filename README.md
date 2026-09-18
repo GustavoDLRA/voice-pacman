@@ -11,7 +11,7 @@ https://docs.astral.sh/uv/getting-started/installation/
    
 2. Clone the repo:
 ```
-git clone <your-repo-url>
+git clone <repo-url>
 cd VoicePacman
 ```
 3. Install dependencies and create the environment:
@@ -23,6 +23,6 @@ uv sync
 uv run python run.py
 ```
 
-You'll need an Nvidia GPU.
+You'll need an Nvidia GPU and a computer with a microphone. 
 
 The base Pac-Man implementation is based on the work done by Jonathan Richards in his [Pacmancode](https://pacmancode.com) website. 
